@@ -24,11 +24,14 @@ Route::group(['middleware' => 'api'], function ($router) {
     Route::post('refresh', [UserAuthController::class, 'refresh']);
     Route::post('logout', [UserAuthController::class, 'logout']);
     Route::get('user', [UserAuthController::class, 'user']);
+
     Route::get('deposit/{id}', [DepositController::class, 'index']);
     Route::get('pending', [DepositController::class, 'pending']);
     Route::post('deposit', [DepositController::class, 'deposit']);
     Route::get('approve/{id}', [DepositController::class, 'approveDeposit']);
     Route::get('reject/{id}', [DepositController::class, 'rejectDeposit']);
+
     Route::post('purchase', [ExpenseController::class, 'expense']);
+
     Route::get('balance', [LedgerController::class, 'index']);
 });

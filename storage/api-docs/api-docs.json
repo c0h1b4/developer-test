@@ -1,0 +1,815 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "OpenApi Banking Documentation",
+        "description": "Banking Backend OpenApi description",
+        "contact": {
+            "email": "dwidman@gmail.com"
+        },
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://localhost:8000",
+            "description": "Banking API Server"
+        }
+    ],
+    "paths": {
+        "/api/deposit": {
+            "post": {
+                "tags": [
+                    "deposit"
+                ],
+                "summary": "Add deposit",
+                "description": "Add a deposit to balance and register the deposit. Must send the image of the check. The status of the deposit is Pending since it is waiting for approval.",
+                "operationId": "deposit",
+                "requestBody": {
+                    "description": "Pass deposit details and document image",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "amount",
+                                    "description"
+                                ],
+                                "properties": {
+                                    "amount": {
+                                        "type": "integer",
+                                        "format": "int64",
+                                        "example": 10000
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "format": "text",
+                                        "example": "Purchase description"
+                                    },
+                                    "image": {
+                                        "type": "string",
+                                        "format": "base64",
+                                        "example": "data:image/jpeg;base64"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "format": "text",
+                                            "example": "Deposit added successfully."
+                                        },
+                                        "deposit": {
+                                            "$ref": "#/components/schemas/Deposit"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ]
+            }
+        },
+        "/api/deposit/{id}": {
+            "get": {
+                "tags": [
+                    "deposit"
+                ],
+                "summary": "Get deposit",
+                "description": "Get deposit to see the document image",
+                "operationId": "deposit",
+                "requestBody": {
+                    "description": "Pass deposit details and document image",
+                    "required": true
+                },
+                "responses": {
+                    "201": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "format": "text",
+                                            "example": "Deposit added successfully."
+                                        },
+                                        "deposit": {
+                                            "$ref": "#/components/schemas/Deposit"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Insufficient funds",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Insufficient funds"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ]
+            }
+        },
+        "/api/pending": {
+            "get": {
+                "tags": [
+                    "deposit"
+                ],
+                "summary": "Get pending deposits",
+                "description": "Get list of all pending deposits (only for admins)",
+                "operationId": "deposit",
+                "requestBody": {
+                    "description": "Pass array of pending status deposits",
+                    "required": true
+                },
+                "responses": {
+                    "201": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "format": "text",
+                                            "example": "Pending Deposits"
+                                        },
+                                        "deposits": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Deposit"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ]
+            }
+        },
+        "/api/expense": {
+            "post": {
+                "tags": [
+                    "expense"
+                ],
+                "summary": "Add purchase",
+                "description": "Add a debit to balance and register the expense. If value is less than balance, throw error.",
+                "operationId": "expense",
+                "requestBody": {
+                    "description": "Pass purchase details",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "amount",
+                                    "description"
+                                ],
+                                "properties": {
+                                    "amount": {
+                                        "type": "integer",
+                                        "format": "int64",
+                                        "example": 10000
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "format": "text",
+                                        "example": "Purchase description"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "format": "text",
+                                            "example": "Expense added successfully"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Insufficient funds",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Insufficient funds"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ]
+            }
+        },
+        "/api/balance": {
+            "get": {
+                "tags": [
+                    "ledger"
+                ],
+                "summary": "Account balance information",
+                "description": "Detailed account balance information",
+                "operationId": "index",
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "ledger": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Ledger"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Returns when user is not authenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthenticated"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ]
+            }
+        },
+        "/api/register": {
+            "post": {
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Sign in",
+                "description": "Register user by name, email, password and password_confirmation",
+                "operationId": "authLogin",
+                "requestBody": {
+                    "description": "Pass user credentials",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "email",
+                                    "password",
+                                    "password_confirmation"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "format": "text",
+                                        "example": "Test User"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "user1@mail.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "PassWord12345"
+                                    },
+                                    "password_confirmation": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "PassWord12345"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "format": "text",
+                                            "example": "User created successfully"
+                                        },
+                                        "user": {
+                                            "$ref": "#/components/schemas/User"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Wrong data response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "multiple errors"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/login": {
+            "post": {
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Log in",
+                "description": "Log user by email and password",
+                "operationId": "authLogin",
+                "requestBody": {
+                    "description": "Pass user credentials",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "email",
+                                    "password"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "user1@mail.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "PassWord12345"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "access_token": {
+                                            "type": "string",
+                                            "format": "text",
+                                            "example": "JWT Json Web Token"
+                                        },
+                                        "token_type": {
+                                            "type": "string",
+                                            "format": "text",
+                                            "example": "Bearer"
+                                        },
+                                        "expires_in": {
+                                            "type": "integer",
+                                            "format": "int64",
+                                            "example": "3600"
+                                        },
+                                        "user": {
+                                            "$ref": "#/components/schemas/User"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Wrong data response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "multiple errors"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/refresh": {
+            "post": {
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Refresh token",
+                "description": "Refresh token",
+                "operationId": "authLogin",
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "access_token": {
+                                            "type": "string",
+                                            "format": "text",
+                                            "example": "JWT Json Web Token"
+                                        },
+                                        "token_type": {
+                                            "type": "string",
+                                            "format": "text",
+                                            "example": "Bearer"
+                                        },
+                                        "expires_in": {
+                                            "type": "integer",
+                                            "format": "int64",
+                                            "example": "3600"
+                                        },
+                                        "user": {
+                                            "$ref": "#/components/schemas/User"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Returns when user is not authenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthenticated"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ]
+            }
+        },
+        "/api/user": {
+            "get": {
+                "tags": [
+                    "auth"
+                ],
+                "summary": "User information",
+                "description": "User information",
+                "operationId": "authLogin",
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "user": {
+                                            "$ref": "#/components/schemas/User"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Returns when user is not authenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthenticated"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ]
+            }
+        },
+        "/api/logout": {
+            "post": {
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Logout user",
+                "description": "Logout the actual user",
+                "operationId": "authLogin",
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "format": "text",
+                                            "example": "success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "format": "text",
+                                            "example": "User logged out succesfully"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Returns when user is not authenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthenticated"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ]
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "Deposit": {
+                "allOf": [
+                    {
+                        "properties": {
+                            "id": {
+                                "type": "integer",
+                                "format": "int64"
+                            },
+                            "type": {
+                                "type": "string",
+                                "format": "string"
+                            },
+                            "updated_at": {
+                                "type": "string",
+                                "format": "string"
+                            },
+                            "created_at": {
+                                "type": "string",
+                                "format": "string"
+                            },
+                            "amount": {
+                                "type": "integer",
+                                "format": "int64"
+                            },
+                            "user_id": {
+                                "type": "integer",
+                                "format": "int64"
+                            },
+                            "description": {
+                                "type": "string",
+                                "format": "string"
+                            },
+                            "status": {
+                                "type": "string",
+                                "format": "string"
+                            },
+                            "documentUrl": {
+                                "type": "string",
+                                "format": "string"
+                            },
+                            "approved_by": {
+                                "type": "integer",
+                                "format": "int64"
+                            }
+                        },
+                        "type": "object"
+                    }
+                ]
+            },
+            "Expense": {
+                "allOf": [
+                    {
+                        "properties": {
+                            "id": {
+                                "type": "integer",
+                                "format": "int64"
+                            },
+                            "type": {
+                                "type": "string",
+                                "format": "string"
+                            },
+                            "updated_at": {
+                                "type": "string",
+                                "format": "string"
+                            },
+                            "created_at": {
+                                "type": "string",
+                                "format": "string"
+                            },
+                            "amount": {
+                                "type": "integer",
+                                "format": "int64"
+                            },
+                            "user_id": {
+                                "type": "integer",
+                                "format": "int64"
+                            },
+                            "description": {
+                                "type": "integer",
+                                "format": "int64"
+                            }
+                        },
+                        "type": "object"
+                    }
+                ]
+            },
+            "Ledger": {
+                "anyOf": [
+                    {
+                        "$ref": "#/components/schemas/Deposit"
+                    },
+                    {
+                        "$ref": "#/components/schemas/Expense"
+                    }
+                ]
+            },
+            "User": {
+                "allOf": [
+                    {
+                        "properties": {
+                            "name": {
+                                "type": "string",
+                                "format": "string"
+                            },
+                            "email": {
+                                "type": "string",
+                                "format": "string"
+                            },
+                            "updated_at": {
+                                "type": "string",
+                                "format": "string"
+                            },
+                            "created_at": {
+                                "type": "string",
+                                "format": "string"
+                            },
+                            "id": {
+                                "type": "integer",
+                                "format": "int64"
+                            },
+                            "balance": {
+                                "type": "integer",
+                                "format": "int64"
+                            }
+                        },
+                        "type": "object"
+                    }
+                ]
+            }
+        },
+        "responses": {
+            "401": {
+                "description": "Returns when user is not authenticated",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "properties": {
+                                "message": {
+                                    "type": "string",
+                                    "example": "Unauthenticated"
+                                }
+                            },
+                            "type": "object"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Projects",
+            "description": "API Endpoints of Projects"
+        }
+    ],
+    "security": [
+        []
+    ]
+}

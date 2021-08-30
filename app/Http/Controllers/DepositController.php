@@ -11,8 +11,89 @@ class DepositController extends Controller
      * Create a instance of DepositController
      * @return void
      */
+
+/**
+ *  @OA\Schema(
+ *  schema="Deposit",
+ *  allOf={
+ *    @OA\Schema(
+ *     @OA\Property(property="id", type="integer", format="int64"),
+ *     @OA\Property(property="type", type="string", format="string"),
+ *     @OA\Property(property="updated_at", type="string", format="string"),
+ *     @OA\Property(property="created_at", type="string", format="string"),
+ *     @OA\Property(property="amount", type="integer", format="int64"),
+ *     @OA\Property(property="user_id", type="integer", format="int64"),
+ *     @OA\Property(property="description", type="string", format="string"),
+ *     @OA\Property(property="status", type="string", format="string"),
+ *     @OA\Property(property="documentUrl", type="string", format="string"),
+ *     @OA\Property(property="approved_by", type="integer", format="int64"),
+ *   )}
+ * ),
+ * @OA\Post(
+ * path="/api/deposit",
+ * summary="Add deposit",
+ * description="Add a deposit to balance and register the deposit. Must send the image of the check. The status of the deposit is Pending since it is waiting for approval.",
+ * operationId="deposit",
+ * tags={"deposit"},
+ * security={ {"bearer": {} }},
+ * @OA\RequestBody(
+ *    required=true,
+ *    description="Pass deposit details and document image",
+ *    @OA\JsonContent(
+ *       required={"amount","description"},
+ *       @OA\Property(property="amount", type="integer", format="int64", example=10000),
+ *       @OA\Property(property="description", type="string", format="text", example="Purchase description"),
+ *       @OA\Property(property="image", type="string", format="base64", example="data:image/jpeg;base64"),
+ *    ),
+ * ),
+ *   @OA\Response(
+ *     response=201,
+ *     description="Success",
+ *     @OA\JsonContent(
+ *        @OA\Property(property="message", type="string", format="text", example="Deposit added successfully."),
+ *        @OA\Property(property="deposit", type="object", ref="#/components/schemas/Deposit"),
+ *     )
+ *  ),
+ * )
+ */
+
     public function __construct() {
         $this->middleware('auth:api');
+    }
+
+/**
+ * @OA\GET(
+ * path="/api/deposit/{id}",
+ * summary="Get deposit",
+ * description="Get deposit to see the document image",
+ * operationId="deposit",
+ * tags={"deposit"},
+ * security={ {"bearer": {} }},
+ * @OA\RequestBody(
+ *    required=true,
+ *    description="Pass deposit details and document image",
+ * ),
+ *   @OA\Response(
+ *     response=201,
+ *     description="Success",
+ *     @OA\JsonContent(
+ *        @OA\Property(property="message", type="string", format="text", example="Deposit added successfully."),
+ *        @OA\Property(property="deposit", type="object", ref="#/components/schemas/Deposit"),
+ *     )
+ *  ),
+ * @OA\Response(
+ *    response=422,
+ *    description="Insufficient funds",
+ *    @OA\JsonContent(
+ *       @OA\Property(property="message", type="string", example="Insufficient funds")
+ *        )
+ *     )
+ * )
+ */
+
+    public function index() {
+        $deposit = Deposit::find(request('id'));
+        return response()->json($deposit);
     }
 
     public function deposit(Request $request) {
@@ -45,10 +126,35 @@ class DepositController extends Controller
         $deposit->save();
 
         return response()->json([
-            'message' => 'Deposit request has been sent.',
+            'message' => 'Deposit added successfully.',
             'deposit' => $deposit
         ], 201);
     }
+
+/**
+ * @OA\GET(
+ * path="/api/pending",
+ * summary="Get pending deposits",
+ * description="Get list of all pending deposits (only for admins)",
+ * operationId="deposit",
+ * tags={"deposit"},
+ * security={ {"bearer": {} }},
+ * @OA\RequestBody(
+ *    required=true,
+ *    description="Pass array of pending status deposits",
+ * ),
+ *   @OA\Response(
+ *     response=201,
+ *     description="Success",
+ *     @OA\JsonContent(
+ *        @OA\Property(property="message", type="string", format="text", example="Pending Deposits"),
+ *        @OA\Property(property="deposits", type="array",
+ *          @OA\Items(ref="#/components/schemas/Deposit"),
+ *        ),
+ *     )
+ *  ),
+ * )
+ */
 
     public function pending() {
         if (auth()->user()->admin != true) {
@@ -80,6 +186,7 @@ class DepositController extends Controller
         }
 
         $deposit->status = 'approved';
+        $deposit->approved_by = auth()->user()->id;
         $deposit->save();
         $deposit->user->balance += $deposit->amount;
         $deposit->user->save();

@@ -21,4 +21,9 @@ class Deposit extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    public function approvedBy()
+    {
+        return $this->belongsTo(User::class, 'approved_by');
+    }
 }
