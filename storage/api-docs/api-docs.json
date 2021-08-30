@@ -149,10 +149,6 @@
                 "summary": "Get pending deposits",
                 "description": "Get list of all pending deposits (only for admins)",
                 "operationId": "deposit",
-                "requestBody": {
-                    "description": "Pass array of pending status deposits",
-                    "required": true
-                },
                 "responses": {
                     "201": {
                         "description": "Success",
@@ -164,6 +160,86 @@
                                             "type": "string",
                                             "format": "text",
                                             "example": "Pending Deposits"
+                                        },
+                                        "deposits": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Deposit"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ]
+            }
+        },
+        "/api/approveDeposit/{id}": {
+            "get": {
+                "tags": [
+                    "deposit"
+                ],
+                "summary": "Approve pending deposit with id",
+                "description": "Approve a pending deposit with id (only for admins) then add value to user balance",
+                "operationId": "deposit",
+                "responses": {
+                    "201": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "format": "text",
+                                            "example": "Deposit approved."
+                                        },
+                                        "deposits": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Deposit"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ]
+            }
+        },
+        "/api/rejectDeposit/{id}": {
+            "get": {
+                "tags": [
+                    "deposit"
+                ],
+                "summary": "Reject pending deposit with id",
+                "description": "Reject a pending deposit with id (only for admins) DON'T add value to user balance",
+                "operationId": "deposit",
+                "responses": {
+                    "201": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "format": "text",
+                                            "example": "Deposit rejected."
                                         },
                                         "deposits": {
                                             "type": "array",

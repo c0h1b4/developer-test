@@ -139,10 +139,6 @@ class DepositController extends Controller
  * operationId="deposit",
  * tags={"deposit"},
  * security={ {"bearer": {} }},
- * @OA\RequestBody(
- *    required=true,
- *    description="Pass array of pending status deposits",
- * ),
  *   @OA\Response(
  *     response=201,
  *     description="Success",
@@ -168,6 +164,27 @@ class DepositController extends Controller
             'deposits' => $deposits
         ], 200);
     }
+
+/**
+ * @OA\GET(
+ * path="/api/approveDeposit/{id}",
+ * summary="Approve pending deposit with id",
+ * description="Approve a pending deposit with id (only for admins) then add value to user balance",
+ * operationId="deposit",
+ * tags={"deposit"},
+ * security={ {"bearer": {} }},
+ *   @OA\Response(
+ *     response=201,
+ *     description="Success",
+ *     @OA\JsonContent(
+ *        @OA\Property(property="message", type="string", format="text", example="Deposit approved."),
+ *        @OA\Property(property="deposits", type="array",
+ *          @OA\Items(ref="#/components/schemas/Deposit"),
+ *        ),
+ *     )
+ *  ),
+ * )
+ */
 
     public function approveDeposit() {
 
@@ -197,6 +214,27 @@ class DepositController extends Controller
         ], 201);
 
     }
+
+/**
+ * @OA\GET(
+ * path="/api/rejectDeposit/{id}",
+ * summary="Reject pending deposit with id",
+ * description="Reject a pending deposit with id (only for admins) DON'T add value to user balance",
+ * operationId="deposit",
+ * tags={"deposit"},
+ * security={ {"bearer": {} }},
+ *   @OA\Response(
+ *     response=201,
+ *     description="Success",
+ *     @OA\JsonContent(
+ *        @OA\Property(property="message", type="string", format="text", example="Deposit rejected."),
+ *        @OA\Property(property="deposits", type="array",
+ *          @OA\Items(ref="#/components/schemas/Deposit"),
+ *        ),
+ *     )
+ *  ),
+ * )
+ */
 
     public function rejectDeposit() {
 
